@@ -18,6 +18,8 @@ Policies are enforced:
 - Client-side (JavaScript) for user experience
 - Server-side (Plugin) for authoritative enforcement
 
+Client-side evaluation must run in **system context**, so the client calls a **Custom API** (rather than reading policy tables directly).
+
 ---
 
 # Core Design Decisions
@@ -46,7 +48,7 @@ PolicyType (single select choice):
 
 # Data Model
 
-## 1️⃣ Policy Rule (Header)
+## 1) Policy Rule (Header)
 
 Represents:
 - What attribute is being controlled
@@ -69,7 +71,7 @@ Represents:
 
 ---
 
-## 2️⃣ Policy Condition (Child of Policy Rule)
+## 2) Policy Condition (Child of Policy Rule)
 
 Represents:
 - When the rule applies
@@ -108,7 +110,22 @@ Represents:
 
 ---
 
-# Runtime Evaluation Model
+# Lookup Comparison Strategy
+
+Lookup constants are stored as:
+
+- ValueLookupLogicalName (text)
+- ValueLookupId (guid)
+
+This avoids creating polymorphic lookup relationships and allows comparison against any table.
+
+Comparison logic:
+- EntityReference.LogicalName == ValueLookupLogicalName
+- EntityReference.Id == ValueLookupId
+
+---
+
+# Evaluation Model
 
 ## Evaluation Steps
 
@@ -121,7 +138,7 @@ Represents:
 
 3. For each rule:
    - Evaluate all Policy Conditions (AND)
-   - If match → apply rule logic
+   - If match → apply policy logic for that PolicyType
 
 ---
 
@@ -152,27 +169,67 @@ Represents:
 
 ---
 
-# Enforcement Behavior
+# Enforcement & Execution Architecture
 
-## Client (Model-Driven App JavaScript)
+This solution intentionally uses **one shared evaluation engine** used by both:
+- the Custom API (for form/client decisions)
+- the Plugin (for database enforcement)
 
-- Applies Visible and Required dynamically
-- Disables controls if NotAllowed = true
-- Re-evaluates on trigger attribute changes
+Important: the Plugin does NOT call the Custom API over HTTP/Web API.  
+Both entry points call the same in-process library/class (shared evaluator code).
+
+## Components
+
+- PolicyEvaluator (shared C# code)
+  - Loads rules/conditions
+  - Evaluates for Visible/Required/NotAllowed
+  - Returns effective decisions (and optionally diagnostics later)
+
+- Custom API: EvaluatePolicies
+  - Runs in system context (so client doesn't need read access to policy tables)
+  - Used by JavaScript to apply UI changes (visible/required/disabled)
+
+- Plugin on governed tables
+  - Registered on Create/Update (PreOperation)
+  - Calls PolicyEvaluator directly
+  - Enforces NotAllowed and Required by throwing exceptions
+
+- Plugin on policy tables (Policy Rule / Policy Condition)
+  - Used only for:
+    - validating configuration (operator/type/value sanity)
+    - cache invalidation (if/when caching is added)
+  - Not used for enforcing business data changes
 
 ---
 
-## Server (Plugin – Create/Update)
+# Runtime Flows
+
+## A) Model-driven Form (JavaScript)
+
+- JS detects changes to trigger fields
+- JS calls Custom API EvaluatePolicies
+- Custom API returns effective decisions
+- JS applies:
+  - Visible → setVisible
+  - Required → setRequiredLevel
+  - NotAllowed → disable control
+
+## B) Server Enforcement (Plugin on governed entity)
+
+On Create/Update (PreOperation):
+- Determine affected attributes (Target keys)
+- Evaluate NotAllowed + Required via PolicyEvaluator
+- Enforce:
 
 ### NotAllowed Enforcement
 
 On Update:
-- If attribute present in Target
-- Compare Target value vs PreImage value
-- If different → throw InvalidPluginExecutionException
+- If attribute present in Target and NotAllowed = true:
+  - Compare Target value vs PreImage value
+  - If different → throw InvalidPluginExecutionException
 
 On Create:
-- If attribute set and rule matches → throw exception
+- If attribute set and NotAllowed = true → throw exception
 
 ### Required Enforcement
 
@@ -184,61 +241,49 @@ On Update:
 
 ---
 
-# Lookup Comparison Strategy
+# Architecture Diagrams
 
-Lookup values are stored as:
+## High-level: one evaluator, two entry points
 
-- ValueLookupLogicalName (text)
-- ValueLookupId (guid)
+```mermaid
+flowchart TD
+    A[Model-driven Form] -->|JS calls| B[Custom API: EvaluatePolicies]
+    B --> C[PolicyEvaluator shared]
+    C --> D[Policy Rule and Condition Tables]
 
-This avoids creating polymorphic lookup relationships and allows comparison against any table.
+    E[Create/Update on Governed Table] --> F[Plugin PreOperation]
+    F --> C
+```
 
-Comparison logic:
-- EntityReference.LogicalName == ValueLookupLogicalName
-- EntityReference.Id == ValueLookupId
+## Enforcement decision behavior
+
+```mermaid
+flowchart TD   
+    A[Evaluate for Attribute and PolicyType] --> B{PolicyType}
+    B -->|Visible| C[First match wins<br/>default true]
+    B -->|Required| D[First match wins<br/>default false]
+    B -->|NotAllowed| E[Deny overrides<br/>any match blocks]
+```
 
 ---
 
 # Limitations (v1)
-
 - Operators limited to Equals, NotEquals, IsNull, IsNotNull
 - AND-only conditions
 - One PolicyType per rule
 - No OR groups
 - No cross-attribute comparison
 - No role/user-based context filtering
-
+- Custom API returns decisions, not full explain traces (yet)
 This version is intentionally minimal and deterministic.
-
----
-
-# Architecture Diagram
-
-```mermaid
-flowchart TD
-    A[Dataverse Operation] --> B[Plugin]
-    B --> C[Load Policy Rules]
-    C --> D[Evaluate Conditions]
-    D --> E{PolicyType}
-    E -->|Visible| F[Apply First Match]
-    E -->|Required| G[Apply First Match]
-    E -->|NotAllowed| H[Deny Overrides]
-```
-
----
 
 # Design Philosophy
 
-- Deterministic rule evaluation
-
+- Deterministic rule evaluation (Sequence)
 - Minimal schema complexity
-
 - Strong server-side enforcement
-
-- Configurable without code changes
-
-- Avoid relationship explosion
-
-- Secure by default
+- System-context evaluation for UI via Custom API
+- Avoid relationship explosion for lookup constants
+- Secure by default (deny-overrides via NotAllowed)
 
 ---

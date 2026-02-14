@@ -1,5 +1,7 @@
 ﻿# Dataverse Policy Engine – Roadmap
 
+This roadmap preserves v1 stability while incrementally adding capability.
+
 ---
 
 # v2.1 – Expanded Operators
@@ -59,30 +61,30 @@ Columns:
 - TargetAttributeLogicalName (text)
 - Sequence
 
-Allows one condition set to control multiple attributes without duplication.
+Allows one condition set to control multiple attributes without duplicating rules.
 
 ---
 
-# v2.5 – Server-Based Evaluation API
+# v2.5 – Custom API Contract Hardening (Client Uses System Context)
 
-Add Custom API:
+Formalize Custom API shape and responses:
 
 EvaluatePolicies(
-    entityLogicalName,
-    recordId,
-    changedAttributes
+- entityLogicalName
+- recordId (optional)
+- changedAttributes (optional)
+- currentValues (optional; if needed for create)
 )
 
-Returns effective:
+Returns effective decisions for:
 - Visible
 - Required
-- NotAllowed decisions
+- NotAllowed
 
-Benefits:
-- JavaScript no longer needs direct read access to policy tables
-- Centralized logic
-- Improved security
-- Consistent evaluation between client and server
+Notes:
+- Client always calls Custom API (system context)
+- JS never needs direct read access to policy tables
+- Plugin never calls Custom API over HTTP; plugin calls evaluator in-process
 
 ---
 
@@ -91,8 +93,9 @@ Benefits:
 Enhance evaluation engine to optionally return:
 
 - Matched Rule IDs
-- Failed Condition IDs
-- Evaluation trace
+- Condition evaluation trace (which condition failed)
+- Effective decision per PolicyType
+- “Why not?” output for admins
 
 Useful for:
 - Admin troubleshooting
@@ -103,9 +106,9 @@ Useful for:
 
 # v2.7 – Performance & Caching
 
-- Cache active rules per entity
-- Cache rule sets by attribute
-- Invalidate cache when policy records change
+- Cache active rules per entity + attribute + policy type
+- Cache conditions grouped by rule
+- Invalidate cache when PolicyRule/PolicyCondition changes (policy-table plugin)
 - Reduce plugin query overhead
 
 ---
@@ -122,20 +125,46 @@ Add optional rule filters:
 
 ---
 
+# v2.9 – Policy Authoring & Validation UX
+
+- Custom Page or PCF authoring experience
+- Attribute picker from metadata
+- Operator/type/value validation on save
+- “Test against record” experience (admin tool)
+- Optional publish/activate flow
+
+---
+
 # Long-Term Vision
 
 - Full metadata-driven rule engine
-- Policy authoring UI (Custom Page or PCF)
-- Rule validation on save
-- Visual policy dependency graph
+- Centralized evaluation engine reused by Custom API + Plugins
+- Policy “explainability” as a first-class feature
 - Enterprise-grade extensibility framework
 
 ---
 
-# Guiding Principles for Future Versions
+# Guiding Principles
 
 - Keep v1 deterministic
 - Add complexity only when needed
 - Preserve backward compatibility
 - Prefer configuration over schema expansion
 - Keep enforcement centralized in plugin layer
+
+---
+
+# Architecture Evolution Diagram
+
+```mermaid
+flowchart TD
+    A[JS Client] -->|System-context evaluation| B[Custom API]
+    B --> C[Shared PolicyEvaluator]
+    C --> D[(Policy Tables)]
+
+    E[Governed Entity Create/Update] --> F[Plugin Steps]
+    F --> C
+
+    D -->|Change| G[Policy Table Plugin]
+    G -->|Validate + Invalidate Cache| C
+```

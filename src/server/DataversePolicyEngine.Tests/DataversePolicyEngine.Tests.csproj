@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataversePolicyEngine.Core\DataversePolicyEngine.Core.csproj" />
+    <ProjectReference Include="..\DataversePolicyEngine.CustomApi\DataversePolicyEngine.CustomApi.csproj" />
     <ProjectReference Include="..\DataversePolicyEngine.Plugin\DataversePolicyEngine.Plugin.csproj" />
   </ItemGroup>
 

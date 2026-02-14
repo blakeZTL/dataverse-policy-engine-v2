@@ -61,22 +61,25 @@
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="Microsoft.Xrm.Sdk">
-      <HintPath>$(SolutionDir)packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.29\lib\net462\Microsoft.Xrm.Sdk.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Crm.Sdk.Proxy">
-      <HintPath>$(SolutionDir)packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.29\lib\net462\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
-    </Reference>
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0" />
     <PackageReference Include="Microsoft.CrmSdk.CoreAssemblies" Version="9.0.2.*" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PolicyEnforcementPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PluginBase.cs" />
+    <Compile Include="ValueEquality.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dpe.snk" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataversePolicyEngine.Core\DataversePolicyEngine.Core.csproj">
+      <Project>{b91f7883-ed7a-4664-a006-47b0bea8a7e2}</Project>
+      <Name>DataversePolicyEngine.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Target Name="GetTfmPublishedFiles">
     <Message Text="GetTfmPublishedFiles from: $(OutputPath)" />

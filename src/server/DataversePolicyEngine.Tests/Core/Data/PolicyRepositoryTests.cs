@@ -62,9 +62,9 @@ namespace DataversePolicyEngine.Tests.Core.Data
 
             var results = repo.GetRules(svc, "account", "name");
 
-            Assert.HasCount(
+            Assert.AreEqual(
                 2,
-                results,
+                results.Count,
                 "Should return only active rules matching entity+attribute."
             );
             Assert.AreEqual(r2.Id, results[0].Id, "Should be ordered by sequence ascending.");
@@ -104,7 +104,11 @@ namespace DataversePolicyEngine.Tests.Core.Data
 
             var results = repo.GetConditions(svc, ruleId);
 
-            Assert.HasCount(2, results, "Should return only conditions for the specified rule.");
+            Assert.AreEqual(
+                2,
+                results.Count,
+                "Should return only conditions for the specified rule."
+            );
             Assert.AreEqual(c2.Id, results[0].Id, "Should be ordered by sequence ascending.");
             Assert.AreEqual(c1.Id, results[1].Id, "Should be ordered by sequence ascending.");
         }

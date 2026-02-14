@@ -2,7 +2,7 @@
   <Project Path="DataversePolicyEngine.Core/DataversePolicyEngine.Core.csproj" Id="b91f7883-ed7a-4664-a006-47b0bea8a7e2" />
   <Project Path="DataversePolicyEngine.CustomApi/DataversePolicyEngine.CustomApi.csproj" Id="98d86a02-c697-4514-8463-f65ee49fb4dd" />
   <Project Path="DataversePolicyEngine.Plugin/DataversePolicyEngine.Plugin.csproj" Id="e1824f6a-fdde-425c-a602-4953ec8209e5" />
-  <Project Path="DataversePolicyEngine.Tests/DataversePolicyEngine.Tests.csproj" Id="e07952a7-6875-4c69-82f2-33fb928859cd" />
+  <Project Path="DataversePolicyEngine.Tests/DataversePolicyEngine.Tests.csproj" />
   <Properties Name="CRMSolutionProperties">
     <Property Name="SolutionIsBoundToCRM" Value="True" />
   </Properties>

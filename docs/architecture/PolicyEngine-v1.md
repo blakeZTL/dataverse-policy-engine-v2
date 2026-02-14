@@ -223,6 +223,7 @@ flowchart TD
     E -->|Visible| F[Apply First Match]
     E -->|Required| G[Apply First Match]
     E -->|NotAllowed| H[Deny Overrides]
+```
 
 ---
 

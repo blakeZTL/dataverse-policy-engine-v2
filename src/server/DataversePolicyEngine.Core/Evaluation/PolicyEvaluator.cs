@@ -74,11 +74,14 @@ namespace DataversePolicyEngine.Core.Evaluation
         {
             int policyOptionValue = OptionSetMap.ToOptionValue(policyType);
 
-            var rules = allRules.Where(
-                r =>
-                    r.GetAttributeValue<OptionSetValue>("dpe_policytype")?.Value
-                    == policyOptionValue
-            );
+            var rules = allRules
+                .Where(
+                    r =>
+                        r.GetAttributeValue<OptionSetValue>("dpe_policytype")?.Value
+                        == policyOptionValue
+                )
+                .OrderBy(r => r.GetAttributeValue<int?>("dpe_sequence") ?? int.MaxValue);
+            ;
 
             foreach (var rule in rules)
             {
@@ -104,11 +107,14 @@ namespace DataversePolicyEngine.Core.Evaluation
         {
             int policyOptionValue = OptionSetMap.ToOptionValue(policyType);
 
-            var rules = allRules.Where(
-                r =>
-                    r.GetAttributeValue<OptionSetValue>("dpe_policytype")?.Value
-                    == policyOptionValue
-            );
+            var rules = allRules
+                .Where(
+                    r =>
+                        r.GetAttributeValue<OptionSetValue>("dpe_policytype")?.Value
+                        == policyOptionValue
+                )
+                .OrderBy(r => r.GetAttributeValue<int?>("dpe_sequence") ?? int.MaxValue);
+            ;
 
             foreach (var rule in rules)
             {
@@ -138,11 +144,16 @@ namespace DataversePolicyEngine.Core.Evaluation
             if (string.IsNullOrWhiteSpace(triggerAttr))
                 return false;
 
-            foreach (var c in conditions)
+            foreach (
+                var c in conditions.OrderBy(
+                    x => x.GetAttributeValue<int?>("dpe_sequence") ?? int.MaxValue
+                )
+            )
             {
                 if (!Comparers.ConditionComparer.Matches(c, triggerAttr, target, preImage))
                     return false;
             }
+
             return true;
         }
     }

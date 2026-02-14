@@ -1,4 +1,4 @@
-﻿# DataversePolicyEngine.Core.Tests
+﻿# DataversePolicyEngine.Tests.Core
 
 This project contains unit tests for the core policy evaluation engine.
 

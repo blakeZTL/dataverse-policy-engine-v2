@@ -45,6 +45,12 @@
 			Placeholder
 		</Description>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>dpe.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -68,6 +74,9 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PluginBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dpe.snk" />
   </ItemGroup>
   <Target Name="GetTfmPublishedFiles">
     <Message Text="GetTfmPublishedFiles from: $(OutputPath)" />

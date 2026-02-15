@@ -79,12 +79,6 @@ async function evaluateAndApplyForTrigger(
 
     if (existingTargets.length === 0) return;
 
-    // one cache key per trigger group (batched)
-    // Sorting makes it stable regardless of rule order
-    //const batchKey = `BATCH|${entity}|${triggerAttr}|${serializeTriggerValue(triggerValue)}|${existingTargets
-    //    .slice()
-    //    .sort()
-    //    .join(",")}`;
 
     const batchTargetId = `__BATCH__:${existingTargets.slice().sort().join(",")}`;
     const batchKey = makeCacheKey(entity, batchTargetId, triggerAttr, triggerValue);

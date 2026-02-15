@@ -14,25 +14,25 @@ namespace DataversePolicyEngine.Core.Evaluation.Comparers
 
             switch (valueType)
             {
-                case 100000000: // String
+                case 0: // String
                     return string.Equals(
                         currentValue.ToString(),
                         condition.GetAttributeValue<string>("dpe_valuestring"),
                         System.StringComparison.OrdinalIgnoreCase
                     );
 
-                case 100000001: // Number
+                case 1: // Number
                     return System.Convert.ToDecimal(currentValue)
                         == condition.GetAttributeValue<decimal>("dpe_valuenumber");
 
-                case 100000002: // Boolean
+                case 5: // Boolean
                     return (bool)currentValue == condition.GetAttributeValue<bool>("dpe_valueboolean");
 
-                case 100000003: // OptionSet
+                case 6: // OptionSet
                     return ((OptionSetValue)currentValue).Value
                         == condition.GetAttributeValue<int>("dpe_valueoptionsetvalue");
 
-                case 100000004: // Lookup
+                case 7: // Lookup
                     var er = (EntityReference)currentValue;
 
                     return er.Id == condition.GetAttributeValue<Guid>("dpe_valuelookupid")

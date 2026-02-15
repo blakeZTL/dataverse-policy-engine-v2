@@ -1,6 +1,6 @@
 import type { PolicyDecision, TriggerValue } from "./types";
 
-const OPERATION_NAME = "dpe_EvaluatePolicies";
+const OPERATION_NAME = "dpe_evaluatepolicies";
 
 function stripBraces(guid: string): string {
     return guid.replace("{", "").replace("}", "");

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dataverse Policy Engine - Builder Guide</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 16px; color: #1b1b1b; }
+    h1 { font-size: 20px; margin: 0 0 10px 0; }
+    h2 { font-size: 16px; margin: 18px 0 6px 0; }
+    h3 { font-size: 14px; margin: 14px 0 6px 0; }
+    p, li { font-size: 13px; line-height: 1.45; }
+    code, pre { font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    pre { background: #f5f5f5; padding: 10px; border-radius: 6px; overflow: auto; }
+    .callout { background: #fff6d6; padding: 10px; border: 1px solid #f0d98c; border-radius: 6px; }
+    .ok { background: #e9f7ef; padding: 10px; border: 1px solid #bfe6cf; border-radius: 6px; }
+    .small { color: #555; font-size: 12px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 6px; }
+    th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; vertical-align: top; }
+    th { background: #f3f3f3; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Dataverse Policy Engine (DPE) - Builder Guide</h1>
+  <p class="small">
+    Use this guide to configure policy rules and wire a model-driven form to apply those rules at runtime (client) and enforce them on save (server).
+  </p>
+
+  <div class="ok">
+    <b>What DPE does</b>
+    <ul>
+      <li><b>Client</b>: Shows/hides fields, sets required level, and optionally disables fields when NotAllowed = true.</li>
+      <li><b>Server</b>: Plugin enforces Required + NotAllowed on Create/Update inside the Dataverse transaction.</li>
+      <li><b>Custom API</b>: dpe_EvaluatePolicies runs in system context to evaluate rules for the form.</li>
+    </ul>
+  </div>
+
+  <h2>Quick checklist</h2>
+  <ol>
+    <li>Enable server-side enforcement for the table (plugin registration).</li>
+    <li>Add the DPE script to the form and register the OnLoad handler.</li>
+    <li>Create policy rules and conditions in the Policy Admin app.</li>
+    <li>Publish.</li>
+  </ol>
+
+  <h2>1) Enable server-side enforcement (plugin registration)</h2>
+  <p>
+    DPE enforces Required and NotAllowed rules in the database transaction using a synchronous plugin.
+    To enable enforcement for a table, a solution administrator must register the enforcement steps for that table.
+  </p>
+
+  <h3>Plugin details</h3>
+  <ul>
+    <li><b>Assembly</b>: DataversePolicyEngine.Plugin</li>
+    <li><b>Plugin class</b>: <code>DataversePolicyEngine.Plugin.PolicyEnforcementPlugin</code></li>
+    <li><b>Stage</b>: PreOperation</li>
+    <li><b>Mode</b>: Synchronous</li>
+    <li><b>Messages</b>: Create and Update</li>
+    <li><b>Primary Entity</b>: The table being governed (example: <code>dpe_example</code>)</li>
+  </ul>
+
+  <h3>Required PreImage (Update step)</h3>
+  <ul>
+    <li><b>PreImage name</b>: <code>PreImage</code></li>
+    <li><b>Image type</b>: PreImage</li>
+    <li><b>Attributes</b>: All attributes (recommended), or at minimum the attributes governed by policy</li>
+  </ul>
+
+  <div class="callout">
+    <b>Why PreImage matters:</b> Update enforcement compares the current values to the PreImage. Without a PreImage, some
+    update validations cannot run correctly.
+  </div>
+
+  <h2>2) Add DPE to a form (client behavior)</h2>
+  <ol>
+    <li>Open the target table form in the form designer.</li>
+    <li>Add the DPE script web resource (example name: <code>dpe_PolicyEngine</code>) to the form libraries.</li>
+    <li>Add a Form OnLoad handler:
+      <ul>
+        <li><b>Function name</b>: <code>DPE.PolicyForm.onLoad</code></li>
+        <li><b>Check</b> <b>Pass execution context as first parameter</b>.</li>
+        <li><b>Parameter</b>: Provide the config string in the format <code>config={...}</code> (example below).</li>
+      </ul>
+    </li>
+  </ol>
+
+  <div class="callout">
+    <b>Common issue:</b> If you see "Web resource method does not exist: DPE.onLoad" you registered the wrong function name.
+    Use <code>DPE.PolicyForm.onLoad</code>.
+  </div>
+
+  <h3>OnLoad parameter format</h3>
+  <p>
+    Dataverse event handler parameters are passed as strings. DPE expects a config string that starts with <code>config=</code>
+    followed by JSON.
+  </p>
+
+  <p class="small"><b>Example parameter (paste exactly as a single line):</b></p>
+  <pre>config={"rules":[{"target":"dpe_hidewhenexample1","trigger":"dpe_choice"},{"target":"dpe_lockwhenexample2","trigger":"dpe_choice"},{"target":"dpe_requirewhenexample3","trigger":"dpe_choice"}],"debounceMs":150,"applyNotAllowedAsDisabled":true,"trace":false,"strict":false}</pre>
+
+  <h2>3) Configure Policy Rules</h2>
+  <p>
+    Policies are configured in <code>dpe_policyrule</code> with one or more <code>dpe_policycondition</code> records.
+    Each rule targets a single attribute and is triggered by a single attribute.
+  </p>
+
+  <table>
+    <tr>
+      <th>Policy Type</th>
+      <th>Meaning</th>
+      <th>Default</th>
+      <th>Match behavior</th>
+    </tr>
+    <tr>
+      <td>Visible</td>
+      <td>Controls whether the target attribute/control is visible.</td>
+      <td>true</td>
+      <td>First match wins.</td>
+    </tr>
+    <tr>
+      <td>Required</td>
+      <td>Controls whether the target is required (not-null on server, required on client).</td>
+      <td>false</td>
+      <td>First match wins.</td>
+    </tr>
+    <tr>
+      <td>NotAllowed</td>
+      <td>Blocks updates/creates (server) and optionally disables on the form (client).</td>
+      <td>false</td>
+      <td>Any deny match overrides (deny wins).</td>
+    </tr>
+  </table>
+
+  <h3>Rule fields (dpe_policyrule)</h3>
+  <ul>
+    <li><b>TargetEntityLogicalName</b>: table logical name (example: <code>dpe_example</code>)</li>
+    <li><b>TargetAttributeLogicalName</b>: column logical name to control</li>
+    <li><b>TriggerAttributeLogicalName</b>: column logical name used for evaluation</li>
+    <li><b>PolicyType</b>: Visible / Required / NotAllowed</li>
+    <li><b>Result</b>: Boolean outcome if the rule matches (Visible true/false, Required true/false, NotAllowed true/false)</li>
+    <li><b>Sequence</b>: ordering used by evaluator</li>
+    <li><b>State</b>: Active rules only are evaluated</li>
+  </ul>
+
+  <h2>4) Configure Conditions</h2>
+  <p>
+    Each <code>dpe_policycondition</code> record defines a condition for the parent rule. Conditions are evaluated in sequence.
+  </p>
+  <ul>
+    <li><b>Operator</b>: Equals, NotEquals, IsNull, IsNotNull</li>
+    <li><b>ValueType</b>: String, Number, Boolean, OptionSet, Lookup</li>
+    <li><b>Typed value columns</b>: set the column that matches the ValueType (for OptionSet, use the numeric option value)</li>
+  </ul>
+
+  <div class="callout">
+    <b>Common mistake:</b> For Choice/OptionSet comparisons, store the <b>numeric</b> option value in the typed value column.
+    Do not store the label text.
+  </div>
+
+  <h2>5) Troubleshooting</h2>
+  <ul>
+    <li><b>No effect on form:</b> Confirm the target attribute exists on the form and is included in the onLoad config rules.</li>
+    <li><b>Wrong behavior:</b> Confirm option set numeric values and that the rule is Active.</li>
+    <li><b>API returns defaults only:</b> Confirm entity/target/trigger logical names match the schema exactly.</li>
+    <li><b>Server enforcement not working:</b> Confirm Create/Update plugin steps are registered for the table and the Update step includes a PreImage named <code>PreImage</code>.</li>
+  </ul>
+
+  <h2>6) Recommended security</h2>
+  <p>
+    Assign a "Policy Admin" security role that grants create/read/update on <code>dpe_policyrule</code> and <code>dpe_policycondition</code>.
+    End users do not need read access to these tables because the Custom API executes in system context.
+  </p>
+
+  <p class="small">
+    DPE Builder Guide - embedded documentation web resource.
+  </p>
+</body>
+</html>

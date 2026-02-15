@@ -31,7 +31,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -88,7 +88,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -144,7 +144,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -197,7 +197,7 @@ namespace DataversePolicyEngine.Tests.Plugin
             // condition expects statuscode == 99, but we set it to 1
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -249,7 +249,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -300,7 +300,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -344,7 +344,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -387,7 +387,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -428,7 +428,7 @@ namespace DataversePolicyEngine.Tests.Plugin
 
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),
@@ -472,7 +472,7 @@ namespace DataversePolicyEngine.Tests.Plugin
             // expects statuscode == 99, but we'll set 1
             var condition = new Entity("dpe_policycondition", Guid.NewGuid())
             {
-                ["dpe_policyrule"] = new EntityReference("dpe_policyrule", ruleId),
+                ["dpe_policyruleid"] = new EntityReference("dpe_policyrule", ruleId),
                 ["dpe_sequence"] = 10,
                 ["dpe_operator"] = new OptionSetValue(OptionSetMap.Operator_Equals),
                 ["dpe_valuetype"] = new OptionSetValue(OptionSetMap.ValueType_OptionSet),

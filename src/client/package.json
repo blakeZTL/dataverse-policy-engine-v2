@@ -1,0 +1,19 @@
+{
+  "name": "@dpe/client",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "echo \"(optional) add eslint later\""
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^6.0.0",
+    "vitest": "^2.1.8",
+    "xrm-mock": "3.6.2",
+    "@types/node": "^22.10.2",
+    "@types/xrm": "^9.0.67"
+  }
+}

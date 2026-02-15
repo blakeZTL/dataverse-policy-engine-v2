@@ -101,11 +101,20 @@ export async function evaluatePoliciesBatch(
     const resp = await Xrm.WebApi.online.execute(request);
     const json = (await resp.json()) as any;
 
+    let parsed: any = json;
+    if (typeof json.ResultsJson === "string") {
+        try {
+            parsed = JSON.parse(json.ResultsJson);
+        } catch {
+            // leave parsed as json; your "items" will likely be []
+        }
+    }
+
     // Expecting server to return an array of results
     // Shape: { Results: [{ Target: "name", Visible: true, Required: false, NotAllowed: false }, ...] }
     const results: BatchedPolicyResult = {};
 
-    const items: any[] = Array.isArray(json.Results) ? json.Results : [];
+    const items: any[] = Array.isArray(parsed.Results) ? parsed.Results : [];
     for (const r of items) {
         const target = r.Target as string;
         if (!target) continue;

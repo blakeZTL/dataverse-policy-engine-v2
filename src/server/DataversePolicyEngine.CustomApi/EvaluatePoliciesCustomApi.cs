@@ -1,7 +1,11 @@
 ﻿using DataversePolicyEngine.Core.Data;
 using DataversePolicyEngine.Core.Evaluation;
+using DataversePolicyEngine.CustomApi.Messages;
 using Microsoft.Xrm.Sdk;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 
 namespace DataversePolicyEngine.CustomApi
 {
@@ -20,7 +24,18 @@ namespace DataversePolicyEngine.CustomApi
             var tracing = localPluginContext.TracingService;
             // Inputs
             var entityLogicalName = GetRequired<string>(ctx, "EntityLogicalName");
-            var targetAttributeLogicalName = GetRequired<string>(ctx, "TargetAttributeLogicalName");
+            // Accept either the new batched param OR the legacy single-target param
+            var targetAttributeLogicalNames = GetOptionalStringArray(
+                ctx,
+                "TargetAttributeLogicalNames"
+            );
+
+            if (targetAttributeLogicalNames == null || targetAttributeLogicalNames.Length == 0)
+            {
+                // legacy fallback
+                var single = GetRequired<string>(ctx, "TargetAttributeLogicalName");
+                targetAttributeLogicalNames = new[] { single };
+            }
             var triggerAttributeLogicalName = GetRequired<string>(
                 ctx,
                 "TriggerAttributeLogicalName"
@@ -36,18 +51,73 @@ namespace DataversePolicyEngine.CustomApi
             }
 
             var evaluator = new PolicyEvaluator(new PolicyRepository());
-            var decision = evaluator.EvaluateAttribute(
-                service,
-                entityLogicalName,
-                targetAttributeLogicalName,
-                target,
-                preImage: null
-            );
+            var response = new EvaluatePoliciesBatchResponse();
 
-            // Outputs
-            ctx.OutputParameters["Visible"] = decision.Visible;
-            ctx.OutputParameters["Required"] = decision.Required;
-            ctx.OutputParameters["NotAllowed"] = decision.NotAllowed;
+            foreach (var targetAttr in targetAttributeLogicalNames)
+            {
+                var decision = evaluator.EvaluateAttribute(
+                    service,
+                    entityLogicalName,
+                    targetAttr,
+                    target,
+                    preImage: null
+                );
+
+                response.Results.Add(
+                    new EvaluatePoliciesTargetResult
+                    {
+                        Target = targetAttr,
+                        Visible = decision.Visible,
+                        Required = decision.Required,
+                        NotAllowed = decision.NotAllowed
+                    }
+                );
+            }
+
+            // New output (preferred)
+            ctx.OutputParameters["ResultsJson"] = JsonSerializer.Serialize(response);
+
+            // Legacy outputs (optional/backward-compatible)
+            if (targetAttributeLogicalNames.Length == 1 && response.Results.Count == 1)
+            {
+                var first = response.Results[0];
+                ctx.OutputParameters["Visible"] = first.Visible;
+                ctx.OutputParameters["Required"] = first.Required;
+                ctx.OutputParameters["NotAllowed"] = first.NotAllowed;
+            }
+        }
+
+        public class PolicyResultDto
+        {
+            public string Target { get; set; }
+            public bool Visible { get; set; }
+            public bool Required { get; set; }
+            public bool NotAllowed { get; set; }
+        }
+
+        private static string[] GetOptionalStringArray(IPluginExecutionContext ctx, string name)
+        {
+            if (!ctx.InputParameters.Contains(name) || ctx.InputParameters[name] == null)
+                return null;
+
+            var raw = ctx.InputParameters[name];
+
+            // Most common case
+            if (raw is string[] sArr)
+                return sArr;
+
+            // Sometimes it arrives as object[]
+            if (raw is object[] oArr)
+                return oArr.OfType<string>().ToArray();
+
+            // Sometimes as IEnumerable<string>
+            if (raw is IEnumerable<string> e)
+                return e.ToArray();
+
+            // Unexpected type
+            throw new InvalidPluginExecutionException(
+                $"Parameter '{name}' was not a string array. Actual type: {raw.GetType().FullName}"
+            );
         }
 
         private static (bool isProvided, object value) ResolveTriggerValue(

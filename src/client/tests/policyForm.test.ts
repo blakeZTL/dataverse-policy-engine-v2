@@ -69,6 +69,10 @@ describe("DPE. onLoad - builder configuration coverage", () => {
         const reqs = getExecuteRequests();
         const req = reqs[0];
 
+        
+        expect(req.TargetAttributeLogicalNames).toEqual(expect.arrayContaining(["name", "telephone1"]));
+
+
         // sanity
         expect(req.operationName || req.getMetadata().operationName).toBeDefined();
 

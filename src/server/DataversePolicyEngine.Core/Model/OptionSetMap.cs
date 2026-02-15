@@ -9,20 +9,20 @@ namespace DataversePolicyEngine.Core.Model
     public static class OptionSetMap
     {
         // TODO: replace these with your actual Dataverse option values
-        public const int PolicyType_Visible = 100000000;
-        public const int PolicyType_Required = 100000001;
-        public const int PolicyType_NotAllowed = 100000002;
+        public const int PolicyType_Visible = (int)PolicyType.Visible;
+        public const int PolicyType_Required = (int)PolicyType.Required;
+        public const int PolicyType_NotAllowed = (int)PolicyType.NotAllowed;
 
-        public const int Operator_Equals = 100000000;
-        public const int Operator_NotEquals = 100000001;
-        public const int Operator_IsNull = 100000002;
-        public const int Operator_IsNotNull = 100000003;
+        public const int Operator_Equals = (int)OperatorType.Equals;
+        public const int Operator_NotEquals = (int)OperatorType.NotEquals;
+        public const int Operator_IsNull = (int)OperatorType.IsNull;
+        public const int Operator_IsNotNull = (int)OperatorType.IsNotNull;
 
-        public const int ValueType_String = 100000000;
-        public const int ValueType_Number = 100000001;
-        public const int ValueType_Boolean = 100000002;
-        public const int ValueType_OptionSet = 100000003;
-        public const int ValueType_Lookup = 100000004;
+        public const int ValueType_String = (int)ValueType.String;
+        public const int ValueType_Number = (int)ValueType.Number;
+        public const int ValueType_Boolean = (int)ValueType.Boolean;
+        public const int ValueType_OptionSet = (int)ValueType.OptionSet;
+        public const int ValueType_Lookup = (int)ValueType.Lookup;
 
         public static int ToOptionValue(PolicyType type)
         {

@@ -4,8 +4,8 @@
     {
         String = 0,
         Number = 1,
-        Boolean = 2,
-        OptionSet = 3,
-        Lookup = 4
+        Boolean = 5,
+        OptionSet = 6,
+        Lookup = 7
     }
 }

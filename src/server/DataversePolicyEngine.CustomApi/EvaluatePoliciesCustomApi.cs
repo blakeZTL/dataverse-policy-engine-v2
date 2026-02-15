@@ -87,14 +87,6 @@ namespace DataversePolicyEngine.CustomApi
             }
         }
 
-        public class PolicyResultDto
-        {
-            public string Target { get; set; }
-            public bool Visible { get; set; }
-            public bool Required { get; set; }
-            public bool NotAllowed { get; set; }
-        }
-
         private static string[] GetOptionalStringArray(IPluginExecutionContext ctx, string name)
         {
             if (!ctx.InputParameters.Contains(name) || ctx.InputParameters[name] == null)

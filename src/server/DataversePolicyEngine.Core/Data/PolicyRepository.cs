@@ -40,7 +40,7 @@ namespace DataversePolicyEngine.Core.Data
                 ColumnSet = new ColumnSet(true)
             };
 
-            query.Criteria.AddCondition("dpe_policyrule", ConditionOperator.Equal, ruleId);
+            query.Criteria.AddCondition("dpe_policyruleid", ConditionOperator.Equal, ruleId);
             query.AddOrder("dpe_sequence", OrderType.Ascending);
 
             return service.RetrieveMultiple(query).Entities.ToList();
